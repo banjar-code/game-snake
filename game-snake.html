@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        //Ini adalah Code untuk menghubungkan JQuery dengan file html kita
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <title>Membuat Game Snake Sederhana Dengan JQuery | Panduan Code</title>
+
+    </head>
+
+    <body>
+
+
+        <canvas id="ruang" width="500" height="500"></canvas>
+
+
+        <script type="text/javascript">
+            $(document).ready(function() {
+
+              // Ini adalah Code untuk mendeklarasikan ruang pada game snake ini
+              var ruang = $("#ruang")[0];
+              var ctx = ruang.getContext("2d");
+              var lebar = $("#ruang").width();
+              var tinggi = $("#ruang").height();
+
+              var cw = 10;
+              var tekan ;
+              var makanan;
+              var nilai;
+
+              //Dibawah ini adalah Code untuk membuat cell aray untuk membuat snake
+              var array_snake;
+
+              function init() {
+                tekan = "right"; //default direction
+                create_snake();
+                create_makanan(); //Code ini berfungsi untuk membuat makanakan untuk snake
+                //nilai game
+                nilai = 0;
+
+                if (typeof game_loop != "undefined") clearInterval(game_loop);
+                game_loop = setInterval(paint, 60);
+            }
+
+            init();
+
+              // Dan Code dibawah ini berguna untuk membuat snake-nya
+              function create_snake() {
+                //Untuk menetapkan jumlah panjang awal snake-nya
+                var length = 5; //5 adalah panjang snake yang default
+                array_snake = [];
+                for (var i = length - 1; i >= 0; i--) {
+                  //Code ini berfungsi untuk membuat snake horizontal mulai dari arah kiri
+                  array_snake.push({ x: i, y: 0 });
+              }
+            }
+
+              //Dan Code yang satu ini berfungsi untuk membuat makanan untuk snake
+              function create_makanan() {
+                makanan = {
+                  x: Math.round(Math.random() * (lebar - cw) / cw),
+                  y: Math.round(Math.random() * (tinggi - cw) / cw)
+              };
+            }
+
+              //Untuk Style pada game snake sederhana anda bisa merubah Code dibawah ini
+              function paint() {
+                //Code warna background
+                ctx.fillStyle = "#ecf0f1";
+                ctx.fillRect(0, 0, lebar, tinggi);
+                ctx.strokeStyle = "#2c3e50";
+                ctx.strokeRect(0, 0, lebar, tinggi);
+
+                //Code membuat pergerakan untuk snake
+                var nx = array_snake[0].x;
+                var ny = array_snake[0].y;
+                if (tekan == "right") nx++;
+                else if (tekan == "left") nx--;
+                else if (tekan == "up") ny--;
+                else if (tekan == "down") ny++;
+
+                //Code memeriksa tabrakan
+                if (
+                  nx == -1 ||
+                  nx == lebar / cw ||
+                  ny == -1 ||
+                  ny == tinggi / cw ||
+                  cek_tabrakan(nx, ny, array_snake)
+                  ){
+
+                //restart game
+            init();
+            return;
+            }
+
+                //Code untuk snake memakan makanan
+                if(nx == makanan.x && ny == makanan.y){
+
+                  var ekor = { x: nx, y: ny };
+                  nilai++;
+             
+                  //Code membuat makanan yang baru
+                  create_makanan();
+             
+              } else {
+                  var ekor = array_snake.pop();
+                  ekor.x = nx;
+                  ekor.y = ny;
+              }
+
+              array_snake.unshift(ekor);
+
+              for (var i = 0; i < array_snake.length; i++) {
+                  var c = array_snake[i];
+                  paint_cell(c.x, c.y);
+              }
+
+              paint_cell(makanan.x, makanan.y);
+
+                //membuat penilaian skor
+                var nilai_text = "nilai: " + nilai;
+                ctx.fillText(nilai_text, 5, tinggi - 5);
+            }
+
+            function paint_cell(x, y) {
+                ctx.fillStyle = "#1abc9c";
+                ctx.fillRect(x * cw, y * cw, cw, cw);
+                ctx.strokeStyle = "#ecf0f1";
+                ctx.strokeRect(x * cw, y * cw, cw, cw);
+            }
+
+            function cek_tabrakan(x, y, array) {
+                for (var i = 0; i < array.length; i++) {
+                  if (array[i].x == x && array[i].y == y) return true;
+              }
+              return false;
+            }
+
+              //Code untuk kontrol snake dengan keyboard
+              $(document).keydown(function(e) {
+                var key = e.which;
+                if (key == "37" && tekan != "right") tekan = "left";
+                else if (key == "38" && tekan != "down") tekan = "up";
+                else if (key == "39" && tekan != "left") tekan = "right";
+                else if (key == "40" && tekan != "up") tekan = "down";
+            });
+            });
+
+            </script>
+
+
+        </body>
+</html>
+
